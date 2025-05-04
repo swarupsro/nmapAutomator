@@ -1,5 +1,6 @@
 #!/bin/sh
 #by @21y4d
+#Moded By Swarup Saha
 
 # Define ANSI color variables
 RED='\033[0;31m'
