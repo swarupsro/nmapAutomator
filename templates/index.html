@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block content %}
+<header class="hero">
+  <div class="hero-text">
+    <p class="eyebrow">Automation, orchestrated</p>
+    <h1>nmapAutomator, now with a cockpit</h1>
+    <p>
+      Launch recon across IP lists, CIDR blocks, or ranges, stream live telemetry, and keep every mission organized from a single gorgeous dashboard.
+    </p>
+    <div class="hero-cta">
+      <button class="primary" data-scroll="#control-center">Start a mission</button>
+      <a class="secondary" href="https://github.com/21y4d/nmapAutomator" target="_blank" rel="noreferrer">Project docs &rarr;</a>
+    </div>
+  </div>
+  <div class="hero-visual">
+    <div class="orbital">
+      <span class="pulse"></span>
+      <span class="pulse delay"></span>
+      <div class="orbital-core">
+        <p>Live scans</p>
+        <strong id="hero-job-count">0</strong>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main id="control-center">
+  <section class="panel-grid">
+    <article class="panel form-panel">
+      <header>
+        <h2>Launch Console</h2>
+        <p>Define your target, choose the scan profile, and we will handle the rest.</p>
+      </header>
+      <form id="scan-form">
+        <div class="form-row">
+          <label for="hosts">Targets <span>*</span></label>
+          <textarea id="hosts" name="hosts" rows="3" placeholder="10.10.10.10, 10.10.10.20-30, 10.10.11.0/24" required></textarea>
+          <p class="hint">Mix hostnames, comma/newline-separated IPs, ranges (10.0.0.5-25), or CIDR blocks (10.0.1.0/24). Duplicates are skipped automatically.</p>
+        </div>
+        <div class="form-row">
+          <label for="scanType">Scan type <span>*</span></label>
+          <select id="scanType" name="scanType" required>
+            <option value="" disabled selected>Select a profile</option>
+            {% for scan_type in scan_types %}
+            <option value="{{ scan_type }}">{{ scan_type }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-inline">
+          <div class="form-row">
+            <label for="dns">Custom DNS server</label>
+            <input id="dns" name="dns" type="text" placeholder="1.1.1.1" />
+          </div>
+          <div class="form-row">
+            <label for="staticNmap">Static nmap path</label>
+            <input id="staticNmap" name="staticNmap" type="text" placeholder="/opt/tools/nmap" />
+          </div>
+        </div>
+        <div class="form-inline">
+          <div class="form-row">
+            <label for="customOutput">Output folder name</label>
+            <input id="customOutput" name="customOutput" type="text" placeholder="engagement-01" />
+          </div>
+          <div class="form-row">
+            <label for="extraArgs">Extra CLI flags</label>
+            <input id="extraArgs" name="extraArgs" type="text" placeholder="--remote --dns 1.1.1.1" />
+          </div>
+        </div>
+        <div class="toggle-row">
+          <label class="switch">
+            <input id="remoteMode" name="remoteMode" type="checkbox" />
+            <span class="slider"></span>
+          </label>
+          <div>
+            <strong>Remote mode</strong>
+            <p>Force POSIX-only commands for lateral movement scenarios.</p>
+          </div>
+        </div>
+        <div class="form-row">
+          <label>Additional scanners</label>
+          <p class="hint">Mark any recon helpers to auto-run after the nmap phase finishes.</p>
+          <div class="scanner-grid">
+            {% for scanner in scanner_choices %}
+            <label class="scanner-pill">
+              <input type="checkbox" name="selectedScanners" value="{{ scanner }}" />
+              <span>{{ scanner }}</span>
+            </label>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="form-row">
+          <label for="notes">Notes</label>
+          <textarea id="notes" name="notes" rows="3" placeholder="Anything the team should know about this scan?"></textarea>
+        </div>
+        <footer class="form-actions">
+          <div id="form-status" role="status"></div>
+          <button type="submit" class="primary">Launch scan</button>
+        </footer>
+      </form>
+    </article>
+
+    <aside class="panel info-panel">
+      <h3>Why the web cockpit?</h3>
+      <ul>
+        <li><strong>Multi-target aware:</strong> Queue IP lists, ranges, or /24 blocks and let Automator march through them.</li>
+        <li><strong>Live recon toggles:</strong> Check the scanners you need (sslscan, vulners, nikto...) right before launch.</li>
+        <li><strong>Deduped evidence:</strong> Structured results show unique findings, ready to copy or export as CSV.</li>
+        <li><strong>Mission history:</strong> Every run stores logs + artifacts for easy download.</li>
+      </ul>
+      <div class="tip-card">
+        <h4>Pro tip</h4>
+        <p>
+          Combine the <code>Full</code> profile with a CIDR target (e.g. <code>10.10.10.0/24</code>) and selected scanners to map complicated environments hands-free.
+        </p>
+      </div>
+    </aside>
+  </section>
+
+  <section class="jobs-section">
+    <header>
+      <div>
+        <p class="eyebrow">Mission control</p>
+        <h2>Live &amp; recent scans</h2>
+      </div>
+      <div class="jobs-actions">
+        <button id="refresh-jobs" class="ghost">Refresh</button>
+      </div>
+    </header>
+    <div id="jobs-list" class="jobs-list empty">
+      <p class="empty-copy">No scans yet. Launch one to watch the console light up.</p>
+    </div>
+  </section>
+</main>
+{% endblock %}
+
